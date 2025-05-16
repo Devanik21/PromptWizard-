@@ -428,12 +428,12 @@ Prompt: {analyze_prompt}
                 # Add a button to remove steps (except the first one)
                 if st.button(f"Remove Step {i + 1}", key=f'remove_workflow_step_{i}'):
                     st.session_state.prompt_workflow_steps.pop(i)
-                    st.experimental_rerun() # Rerun to update the UI after removing a step
+                    st.rerun() # Rerun to update the UI after removing a step
 
         # Button to add a new prompt step
         if st.button("Add Another Step"):
             st.session_state.prompt_workflow_steps.append({})
-            st.experimental_rerun() # Rerun to show the new text area
+            st.rerun() # Rerun to show the new text area
 
         if st.button("Run Workflow") and st.session_state.prompt_workflow_steps:
             current_input = initial_input
