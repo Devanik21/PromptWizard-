@@ -1,3 +1,5 @@
+# This is the updated code with added functionalities for the specified libraries.
+
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
@@ -7,10 +9,41 @@ import os
 from datetime import datetime
 import pyperclip
 
+# Libraries to be added/demonstrated
+import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from gtts import gTTS
+from PIL import Image
+import requests
+from io import BytesIO
+
+# Ensure NLTK data is downloaded (only needs to be done once)
+try:
+    nltk.data.find('tokenizers/punkt')
+except nltk.downloader.DownloadError:
+    nltk.download('punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
+    nltk.data.find('corpora/stopwords')
+except nltk.downloader.DownloadError:
+    nltk.download('stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+
 st.set_page_config(page_title="Prompt Engineer's Toolkit", layout="centered")
 st.title("🔧 Prompt Engineer's Toolkit")
 st.markdown("""
 Enter a **goal** and optionally a **poor prompt**. This tool will generate optimized prompt templates and debug the poor one.
+Added functionalities for data visualization, text processing, image handling, and web requests are also included.
 """)
 
 st.sidebar.title("🔐 API Configuration")
@@ -56,7 +89,8 @@ if api_key:
         output_format = st.radio("Output Format", ["Text", "JSON", "Markdown"])
         num_prompts = st.slider("Number of prompts to generate", 1, 5, 3)
 
-    tab1, tab2, tab3 = st.tabs(["Generate Prompts", "A/B Test Prompts", "💬 Prompt Coach Chat"])
+    # Added a new tab for library demonstrations
+    tab1, tab2, tab3, tab4 = st.tabs(["Generate Prompts", "A/B Test Prompts", "💬 Prompt Coach Chat", "🔬 Library Demonstrations"])
 
     with tab1:
         if st.button("Generate Optimized Prompts") and goal:
@@ -207,7 +241,7 @@ Prompt: {analyze_prompt}
                 st.markdown(few_shot.text)
 
 
-    
+
 
     with tab2:
         st.write("Compare two different prompts to see which performs better")
@@ -259,5 +293,124 @@ Prompt: {analyze_prompt}
 
         for sender, msg in st.session_state.chat_history:
             st.markdown(f"**{sender}:** {msg}")
+
+    # New tab for library demonstrations
+    with tab4:
+        st.header("🔬 Library Demonstrations")
+
+        with st.expander("📊 Plotly & Matplotlib/Seaborn Demonstration"):
+            st.subheader("Data Visualization")
+            st.write("Generate plots using Plotly, Matplotlib, and Seaborn.")
+
+            # Example Data for plotting
+            data = {'Category': ['A', 'B', 'C', 'D', 'E'],
+                    'Value': [10, 15, 7, 12, 9]}
+            df = pd.DataFrame(data)
+
+            st.write("Sample Data:")
+            st.dataframe(df)
+
+            # Plotly Example (Interactive)
+            st.subheader("Plotly Chart (Interactive)")
+            fig_plotly = px.bar(df, x='Category', y='Value', title='Plotly Bar Chart')
+            st.plotly_chart(fig_plotly)
+
+            # Matplotlib Example (Static)
+            st.subheader("Matplotlib Chart (Static)")
+            fig_mpl, ax = plt.subplots()
+            ax.bar(df['Category'], df['Value'])
+            ax.set_title('Matplotlib Bar Chart')
+            ax.set_xlabel('Category')
+            ax.set_ylabel('Value')
+            st.pyplot(fig_mpl)
+
+            # Seaborn Example (Static)
+            st.subheader("Seaborn Chart (Static)")
+            fig_seaborn, ax_seaborn = plt.subplots()
+            sns.barplot(x='Category', y='Value', data=df, ax=ax_seaborn)
+            ax_seaborn.set_title('Seaborn Bar Chart')
+            st.pyplot(fig_seaborn)
+
+        with st.expander("☁️ Wordcloud Demonstration"):
+            st.subheader("Wordcloud Generation")
+            st.write("Generate a wordcloud from text input.")
+            wordcloud_text = st.text_area("Enter text for Wordcloud", "Enter your text here to generate a wordcloud demonstration. Wordcloud is a great way to visualize text data frequency.", height=100)
+            if st.button("Generate Wordcloud"):
+                if wordcloud_text:
+                    wc = WordCloud(width=800, height=400, background_color='white').generate(wordcloud_text)
+                    plt.figure(figsize=(10, 5))
+                    plt.imshow(wc, interpolation='bilinear')
+                    plt.axis("off")
+                    st.pyplot(plt)
+                else:
+                    st.warning("Please enter some text to generate a wordcloud.")
+
+        with st.expander("📝 TextBlob & NLTK Demonstration"):
+            st.subheader("Text Analysis")
+            st.write("Perform sentiment analysis and tokenization using TextBlob and NLTK.")
+            analysis_text = st.text_area("Enter text for analysis", "TextBlob is great for sentiment analysis. NLTK is useful for text processing like tokenization.", height=100)
+            if st.button("Analyze Text"):
+                if analysis_text:
+                    # TextBlob Sentiment
+                    blob = TextBlob(analysis_text)
+                    st.write(f"Sentiment Polarity: {blob.sentiment.polarity:.2f}")
+                    st.write(f"Sentiment Subjectivity: {blob.sentiment.subjectivity:.2f}")
+
+                    # NLTK Tokenization and Stop words
+                    tokens = word_tokenize(analysis_text)
+                    stop_words = set(stopwords.words('english'))
+                    filtered_tokens = [w for w in tokens if w.lower() not in stop_words and w.isalnum()]
+                    st.write("Tokens (excluding stop words and punctuation):")
+                    st.write(filtered_tokens)
+                else:
+                    st.warning("Please enter some text for analysis.")
+
+        with st.expander("🗣️ gTTS Demonstration"):
+            st.subheader("Text-to-Speech")
+            st.write("Convert text to speech using Google Text-to-Speech.")
+            tts_text = st.text_area("Enter text to convert to speech", "Hello, this is a text to speech demonstration using gTTS.", height=100)
+            # Using a unique key for the button
+            if st.button("Generate Speech", key="generate_speech_button"):
+                if tts_text:
+                    try:
+                        tts = gTTS(text=tts_text, lang='en', slow=False)
+                        # Save to a bytes object instead of a file
+                        audio_bytes_io = BytesIO()
+                        tts.write_to_fp(audio_bytes_io)
+                        audio_bytes_io.seek(0)
+                        st.audio(audio_bytes_io, format="audio/mp3")
+                    except Exception as e:
+                        st.error(f"Error generating speech: {e}")
+                else:
+                    st.warning("Please enter some text to convert to speech.")
+
+        with st.expander("🖼️ Pillow Demonstration"):
+            st.subheader("Image Handling")
+            st.write("Display an uploaded image using Pillow.")
+            uploaded_image = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
+            if uploaded_image is not None:
+                try:
+                    img = Image.open(uploaded_image)
+                    st.image(img, caption="Uploaded Image", use_column_width=True)
+                except Exception as e:
+                    st.error(f"Error loading image: {e}")
+
+        with st.expander("🌐 Requests Demonstration"):
+            st.subheader("Make HTTP Requests")
+            st.write("Fetch data from a URL using the requests library.")
+            request_url = st.text_input("Enter a URL", "https://www.google.com")
+            if st.button("Fetch URL Content"):
+                if request_url:
+                    try:
+                        response = requests.get(request_url)
+                        st.write(f"Status Code: {response.status_code}")
+                        st.write("Partial Content (first 500 characters):")
+                        st.text(response.text[:500] + "...")
+                    except Exception as e:
+                        st.error(f"Error fetching URL: {e}")
+                else:
+                    st.warning("Please enter a URL.")
+
+
 else:
     st.warning("Please enter your Gemini API key in the sidebar.")
