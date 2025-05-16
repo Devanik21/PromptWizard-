@@ -392,7 +392,7 @@ Prompt: {analyze_prompt}
             if uploaded_image is not None:
                 try:
                     img = Image.open(uploaded_image)
-                    st.image(img, caption="Uploaded Image", use_column_width=True)
+                    st.image(img, caption="Uploaded Image", use_container_width=True)
                 except Exception as e:
                     st.error(f"Error loading image: {e}")
 
