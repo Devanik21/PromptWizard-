@@ -1,4 +1,4 @@
-# This is the updated code with added functionalities for the specified libraries.
+# This is the updated code with added functionalities for the specified libraries, with NLTK removed.
 
 import streamlit as st
 import google.generativeai as genai
@@ -15,35 +15,36 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from wordcloud import WordCloud
 from textblob import TextBlob
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+# Removed nltk import and related imports
+# import nltk
+# from nltk.corpus import stopwords
+# from nltk.tokenize import word_tokenize
 from gtts import gTTS
 from PIL import Image
 import requests
 from io import BytesIO
 
-# Ensure NLTK data is downloaded (only needs to be done once)
-try:
-    nltk.data.find('tokenizers/punkt')
-except nltk.downloader.DownloadError:
-    nltk.download('punkt')
-except LookupError:
-    nltk.download('punkt')
+# Removed NLTK download code block
+# try:
+#     nltk.data.find('tokenizers/punkt')
+# except nltk.downloader.DownloadError:
+#     nltk.download('punkt')
+# except LookupError:
+#     nltk.download('punkt')
 
-try:
-    nltk.data.find('corpora/stopwords')
-except nltk.downloader.DownloadError:
-    nltk.download('stopwords')
-except LookupError:
-    nltk.download('stopwords')
+# try:
+#     nltk.data.find('corpora/stopwords')
+# except nltk.downloader.DownloadError:
+#     nltk.download('stopwords')
+# except LookupError:
+#     nltk.download('stopwords')
 
 
 st.set_page_config(page_title="Prompt Engineer's Toolkit", layout="centered")
 st.title("🔧 Prompt Engineer's Toolkit")
 st.markdown("""
 Enter a **goal** and optionally a **poor prompt**. This tool will generate optimized prompt templates and debug the poor one.
-Added functionalities for data visualization, text processing, image handling, and web requests are also included.
+Added functionalities for data visualization, text processing (using TextBlob), image handling, and web requests are also included.
 """)
 
 st.sidebar.title("🔐 API Configuration")
@@ -345,10 +346,10 @@ Prompt: {analyze_prompt}
                 else:
                     st.warning("Please enter some text to generate a wordcloud.")
 
-        with st.expander("📝 TextBlob & NLTK Demonstration"):
-            st.subheader("Text Analysis")
-            st.write("Perform sentiment analysis and tokenization using TextBlob and NLTK.")
-            analysis_text = st.text_area("Enter text for analysis", "TextBlob is great for sentiment analysis. NLTK is useful for text processing like tokenization.", height=100)
+        with st.expander("📝 TextBlob Demonstration"): # Updated expander title
+            st.subheader("Text Analysis (TextBlob)") # Updated subheader
+            st.write("Perform sentiment analysis using TextBlob.") # Updated description
+            analysis_text = st.text_area("Enter text for analysis", "TextBlob is great for sentiment analysis.", height=100) # Updated placeholder
             if st.button("Analyze Text"):
                 if analysis_text:
                     # TextBlob Sentiment
@@ -356,12 +357,12 @@ Prompt: {analyze_prompt}
                     st.write(f"Sentiment Polarity: {blob.sentiment.polarity:.2f}")
                     st.write(f"Sentiment Subjectivity: {blob.sentiment.subjectivity:.2f}")
 
-                    # NLTK Tokenization and Stop words
-                    tokens = word_tokenize(analysis_text)
-                    stop_words = set(stopwords.words('english'))
-                    filtered_tokens = [w for w in tokens if w.lower() not in stop_words and w.isalnum()]
-                    st.write("Tokens (excluding stop words and punctuation):")
-                    st.write(filtered_tokens)
+                    # Removed NLTK Tokenization and Stop words
+                    # tokens = word_tokenize(analysis_text)
+                    # stop_words = set(stopwords.words('english'))
+                    # filtered_tokens = [w for w in tokens if w.lower() not in stop_words and w.isalnum()]
+                    # st.write("Tokens (excluding stop words and punctuation):")
+                    # st.write(filtered_tokens)
                 else:
                     st.warning("Please enter some text for analysis.")
 
