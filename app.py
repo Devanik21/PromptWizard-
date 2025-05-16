@@ -151,6 +151,64 @@ Prompt: {analyze_prompt}
                 risk_result = model.generate_content(f"Analyze this prompt for sensitive content:\n{check_prompt}")
                 st.markdown(risk_result.text)
 
+            with st.expander("🧠 Prompt Use Case Generator"):
+            theme_input = st.text_input("Enter a theme or domain")
+            if st.button("Generate Use Cases"):
+                use_cases = model.generate_content(f"Generate 5 prompt use cases for: {theme_input}")
+                st.markdown(use_cases.text)
+
+        with st.expander("📊 Prompt to Slide Generator"):
+            slide_prompt = st.text_area("Enter topic for slides")
+            if st.button("Generate Slides Outline"):
+                slides = model.generate_content(f"Generate slide deck outline for: {slide_prompt}")
+                st.markdown(slides.text)
+
+        with st.expander("🧵 Thread Generator for X/Twitter"):
+            thread_topic = st.text_input("Topic for Twitter Thread")
+            if st.button("Generate Thread"):
+                thread = model.generate_content(f"Generate a Twitter thread on: {thread_topic}")
+                st.markdown(thread.text)
+
+        with st.expander("🧩 Reverse Prompt Engineer"):
+            reverse_prompt = st.text_area("Output you want", height=100)
+            if st.button("Find Possible Prompt"):
+                reverse = model.generate_content(f"What prompt would lead to this output:\n{reverse_prompt}")
+                st.markdown(reverse.text)
+
+        with st.expander("💡 Prompt Variants Explorer"):
+            variant_base = st.text_area("Enter base prompt")
+            if st.button("Generate Variants"):
+                variants = model.generate_content(f"Generate 5 creative variants of: {variant_base}")
+                st.markdown(variants.text)
+
+        with st.expander("🔄 Prompt Reformatter"):
+            messy_prompt = st.text_area("Enter poorly structured prompt")
+            if st.button("Reformat Prompt"):
+                cleaned = model.generate_content(f"Reformat this prompt clearly and professionally:\n{messy_prompt}")
+                st.markdown(cleaned.text)
+
+        with st.expander("🗃️ Prompt Storage Suggestor"):
+            storage_type = st.text_input("Describe your use case")
+            if st.button("Suggest Storage"):
+                suggestion = model.generate_content(f"Suggest best way to store prompts for this use: {storage_type}")
+                st.markdown(suggestion.text)
+
+        with st.expander("🔍 SEO Prompt Optimizer"):
+            seo_prompt = st.text_area("Enter content-related prompt")
+            if st.button("Optimize for SEO"):
+                optimized = model.generate_content(f"Optimize this prompt for SEO content creation:\n{seo_prompt}")
+                st.markdown(optimized.text)
+
+        with st.expander("🧠 Few-Shot Prompt Creator"):
+            task_desc = st.text_area("Task Description")
+            examples_few = st.text_area("Examples (comma separated)")
+            if st.button("Generate Few-Shot Prompt"):
+                few_shot = model.generate_content(f"Create few-shot prompt for: {task_desc} using examples: {examples_few}")
+                st.markdown(few_shot.text)
+
+
+    
+
     with tab2:
         st.write("Compare two different prompts to see which performs better")
         prompt_a = st.text_area("Prompt A", height=100)
