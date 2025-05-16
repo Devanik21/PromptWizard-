@@ -151,7 +151,7 @@ Prompt: {analyze_prompt}
                 risk_result = model.generate_content(f"Analyze this prompt for sensitive content:\n{check_prompt}")
                 st.markdown(risk_result.text)
 
-            with st.expander("🧠 Prompt Use Case Generator"):
+        with st.expander("🧠 Prompt Use Case Generator"):
             theme_input = st.text_input("Enter a theme or domain")
             if st.button("Generate Use Cases"):
                 use_cases = model.generate_content(f"Generate 5 prompt use cases for: {theme_input}")
