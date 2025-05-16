@@ -2,3 +2,12 @@ streamlit
 google-generativeai
 pandas
 pyperclip
+plotly
+matplotlib
+seaborn
+wordcloud
+textblob
+nltk
+gtts
+Pillow
+requests
