@@ -1,4 +1,4 @@
-# This is the updated code with added functionalities for the specified libraries, with NLTK removed.
+# This is the updated code with added functionalities for the specified libraries and a new Prompt Workflow tab.
 
 import streamlit as st
 import google.generativeai as genai
@@ -40,11 +40,12 @@ from io import BytesIO
 #     nltk.download('stopwords')
 
 
+
 st.set_page_config(page_title="Prompt Engineer's Toolkit", layout="centered",page_icon="🛠️")
 st.title("🔧 Prompt Engineer's Toolkit")
 st.markdown("""
 Enter a **goal** and optionally a **poor prompt**. This tool will generate optimized prompt templates and debug the poor one.
-Added functionalities for data visualization, text processing (using TextBlob), image handling, and web requests are also included.
+Added functionalities for data visualization, text processing (using TextBlob), image handling, web requests, and a Prompt Workflow builder are also included.
 """)
 
 st.sidebar.title("🔐 API Configuration")
@@ -90,8 +91,8 @@ if api_key:
         output_format = st.radio("Output Format", ["Text", "JSON", "Markdown"])
         num_prompts = st.slider("Number of prompts to generate", 1, 5, 3)
 
-    # Added a new tab for library demonstrations
-    tab1, tab2, tab3, tab4 = st.tabs(["Generate Prompts", "A/B Test Prompts", "💬 Prompt Coach Chat", "🔬 Library Demonstrations"])
+    # Added a new tab for Prompt Workflow
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Generate Prompts", "A/B Test Prompts", "💬 Prompt Coach Chat", "🔬 Library Demonstrations", "🔗 Prompt Workflow"])
 
     with tab1:
         if st.button("Generate Optimized Prompts") and goal:
@@ -295,7 +296,7 @@ Prompt: {analyze_prompt}
         for sender, msg in st.session_state.chat_history:
             st.markdown(f"**{sender}:** {msg}")
 
-    # New tab for library demonstrations
+    # Tab for Library Demonstrations
     with tab4:
         st.header("🔬 Library Demonstrations")
 
@@ -346,23 +347,16 @@ Prompt: {analyze_prompt}
                 else:
                     st.warning("Please enter some text to generate a wordcloud.")
 
-        with st.expander("📝 TextBlob Demonstration"): # Updated expander title
-            st.subheader("Text Analysis (TextBlob)") # Updated subheader
-            st.write("Perform sentiment analysis using TextBlob.") # Updated description
-            analysis_text = st.text_area("Enter text for analysis", "TextBlob is great for sentiment analysis.", height=100) # Updated placeholder
+        with st.expander("📝 TextBlob Demonstration"):
+            st.subheader("Text Analysis (TextBlob)")
+            st.write("Perform sentiment analysis using TextBlob.")
+            analysis_text = st.text_area("Enter text for analysis", "TextBlob is great for sentiment analysis.", height=100)
             if st.button("Analyze Text"):
                 if analysis_text:
                     # TextBlob Sentiment
                     blob = TextBlob(analysis_text)
                     st.write(f"Sentiment Polarity: {blob.sentiment.polarity:.2f}")
                     st.write(f"Sentiment Subjectivity: {blob.sentiment.subjectivity:.2f}")
-
-                    # Removed NLTK Tokenization and Stop words
-                    # tokens = word_tokenize(analysis_text)
-                    # stop_words = set(stopwords.words('english'))
-                    # filtered_tokens = [w for w in tokens if w.lower() not in stop_words and w.isalnum()]
-                    # st.write("Tokens (excluding stop words and punctuation):")
-                    # st.write(filtered_tokens)
                 else:
                     st.warning("Please enter some text for analysis.")
 
@@ -392,7 +386,7 @@ Prompt: {analyze_prompt}
             if uploaded_image is not None:
                 try:
                     img = Image.open(uploaded_image)
-                    st.image(img, caption="Uploaded Image", use_container_width=True)
+                    st.image(img, caption="Uploaded Image", use_column_width=True)
                 except Exception as e:
                     st.error(f"Error loading image: {e}")
 
@@ -412,6 +406,61 @@ Prompt: {analyze_prompt}
                 else:
                     st.warning("Please enter a URL.")
 
+    # New tab for Prompt Workflow
+    with tab5:
+        st.header("🔗 Prompt Workflow Builder")
+        st.write("Build a sequence of prompts where the output of one becomes the input for the next.")
+
+        # Initialize prompt steps in session state if not already present
+        if 'prompt_workflow_steps' not in st.session_state:
+            st.session_state.prompt_workflow_steps = [{}]
+
+        initial_input = st.text_area("Initial Input for the Workflow", height=150, key='workflow_initial_input')
+
+        st.subheader("Define Prompt Steps:")
+
+        # Display existing prompt steps and allow editing
+        for i in range(len(st.session_state.prompt_workflow_steps)):
+            step = st.session_state.prompt_workflow_steps[i]
+            st.markdown(f"**Step {i + 1}**")
+            step['prompt'] = st.text_area(f"Prompt for Step {i + 1}", height=100, key=f'workflow_prompt_{i}')
+            if i > 0:
+                # Add a button to remove steps (except the first one)
+                if st.button(f"Remove Step {i + 1}", key=f'remove_workflow_step_{i}'):
+                    st.session_state.prompt_workflow_steps.pop(i)
+                    st.experimental_rerun() # Rerun to update the UI after removing a step
+
+        # Button to add a new prompt step
+        if st.button("Add Another Step"):
+            st.session_state.prompt_workflow_steps.append({})
+            st.experimental_rerun() # Rerun to show the new text area
+
+        if st.button("Run Workflow") and st.session_state.prompt_workflow_steps:
+            current_input = initial_input
+            st.subheader("Workflow Results:")
+            for i, step in enumerate(st.session_state.prompt_workflow_steps):
+                prompt = step.get('prompt', '').strip()
+                if not prompt:
+                    st.warning(f"Step {i+1} has no prompt. Skipping.")
+                    continue
+
+                st.markdown(f"---")
+                st.markdown(f"**Running Step {i + 1}**")
+                st.info(f"Input to Step {i+1}:")
+                st.text(current_input[:500] + "..." if len(current_input) > 500 else current_input) # Show truncated input
+
+                with st.spinner(f"Executing Step {i + 1}..."):
+                    try:
+                        # Combine the prompt and the current input
+                        response = model.generate_content(f"{prompt}\n\nInput: {current_input}")
+                        step_output = response.text
+                        st.success(f"Output from Step {i + 1}:")
+                        st.markdown(step_output) # Use markdown for better formatting
+                        current_input = step_output # The output of this step is the input for the next
+                    except Exception as e:
+                        st.error(f"Error executing Step {i + 1}: {e}")
+                        # Stop the workflow if an error occurs
+                        break
 
 else:
     st.warning("Please enter your Gemini API key in the sidebar.")
