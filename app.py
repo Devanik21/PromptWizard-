@@ -40,7 +40,7 @@ from io import BytesIO
 #     nltk.download('stopwords')
 
 
-st.set_page_config(page_title="Prompt Engineer's Toolkit", layout="centered")
+st.set_page_config(page_title="Prompt Engineer's Toolkit", layout="centered",page_icon="🛠️")
 st.title("🔧 Prompt Engineer's Toolkit")
 st.markdown("""
 Enter a **goal** and optionally a **poor prompt**. This tool will generate optimized prompt templates and debug the poor one.
